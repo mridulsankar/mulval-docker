@@ -1,0 +1,29 @@
+image:
+    file: .gitpod.Dockerfile
+
+tasks:
+    - name: Set ENV variables
+      command: |
+          export XSB_DIR=$(pwd)/XSB
+          export MULVALROOT=$(pwd)/mulval
+          gp env -u PATH
+          gp env MULVALROOT=$MULVALROOT
+          gp env PATH=$PATH:$XSB_DIR/bin:$MULVALROOT/bin:$MULVALROOT/utils
+
+    - name: Install XSB
+      init: |
+          tar xzf XSB-5.0.tar.gz
+          cd XSB/build
+          ./configure
+          ./makexsb
+      command: gp sync-done xsb
+
+    - name: Download & Install MulVal
+      init: |
+          wget https://www.arguslab.org/software/mulval_1_1.tar.gz
+          tar xzf mulval_1_1.tar.gz
+          gp sync-await xsb
+          eval $(gp env -e)
+          cd mulval
+          make
+      command: eval $(gp env -e)
